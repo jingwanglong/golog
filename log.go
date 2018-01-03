@@ -213,6 +213,22 @@ func (self *Logger) Log(c Color, level Level, format string, v ...interface{}) {
 	if self.fileOutput == nil {
 		out = os.Stdout
 	} else {
+		filename := self.fileOutput.Name()
+		fileinfo, err := os.Stat(filename)
+		if err != nil{
+			panic(err)
+		}
+		todayDate := time.Now().Format("2006-01-02")
+		modeDate := fileinfo.ModTime().Format("2006-01-02")
+		if todayDate != modeDate {
+			self.fileOutput.Close()
+			rename := filename + modeDate
+			err = os.Rename(filename, rename)
+			if err != nil{
+				panic(err)
+			}
+			SetOutputLogger("*", filename)
+		}
 		out = self.fileOutput
 	}
 
